@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'data_kontak.dart';
+import 'halaman_detail.dart';
 
 class HalamanUtama extends StatefulWidget {
   @override
@@ -72,14 +73,14 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                       title: Text(kontak.namaDepan),
                       subtitle: Text(kontak.email),
                       
-                      // onTap: () {
-                      //   Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //       builder: (context) => DetailKontak(kontak: kontak),
-                      //     ),
-                      //   );
-                      // }
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailKontak(kontak: kontak),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
