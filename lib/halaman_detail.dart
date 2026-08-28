@@ -38,7 +38,7 @@ class _DetailKontakState extends State<DetailKontak> {
             ),
 
             SizedBox(height: 20),
-            
+
             Text(
               widget.kontak.namaDepan + " " + widget.kontak.namaBelakang,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -46,11 +46,10 @@ class _DetailKontakState extends State<DetailKontak> {
 
             SizedBox(height: 20),
 
-            // KOTAK INFORMASI DETAIL LU DI SINI
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Card(
-                elevation: 3, // Bikin efek bayangan (3D)
+                elevation: 3, 
                 child: Column(
                   children: [
                     ListTile(

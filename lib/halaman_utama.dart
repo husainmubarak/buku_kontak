@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
@@ -11,12 +12,14 @@ class HalamanUtama extends StatefulWidget {
 
 class _HalamanUtamaState extends State<HalamanUtama> {
   List<DataKontak> daftarKontak = [];
+  List<String> daftarIdFavorit = [];
   bool isLoading = false;
 
    @override
   void initState() {
     super.initState();
     ambilDataDariInternet(); 
+    bacaDaftarIdFavorit();
   }
 
   Future<void> ambilDataDariInternet() async {
@@ -29,6 +32,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
         List<dynamic> dataJsonMentah = jsonDecode(response.body)['data'];
 
         setState(() {
@@ -42,6 +46,20 @@ class _HalamanUtamaState extends State<HalamanUtama> {
         isLoading = false;
       });
     }
+  }
+
+  void bacaDaftarIdFavorit() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    setState(() {
+      daftarIdFavorit = prefs.getStringList('data_favorit') ?? [];
+    });
+  }
+
+  void simpanDaftarIdFavorit() async {
+    final prefs = await SharedPreferences.getInstance();
+   
+    await prefs.setStringList('data_favorit', daftarIdFavorit);
   }
 
   @override
@@ -62,6 +80,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                 itemBuilder: (context, index) {
 
                   DataKontak kontak = daftarKontak[index];
+                  bool isFavorit = daftarIdFavorit.contains(kontak.id.toString());
 
                   return Card(
                     margin: EdgeInsets.symmetric(vertical: 5),
@@ -72,6 +91,23 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                       ),
                       title: Text(kontak.namaDepan),
                       subtitle: Text(kontak.email),
+                      trailing: IconButton(
+                        icon: Icon(
+                          isFavorit ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorit ? Colors.red : null,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (isFavorit) {
+                              daftarIdFavorit.remove(kontak.id.toString());
+                            } else {
+                              daftarIdFavorit.add(kontak.id.toString());
+                            }
+
+                            simpanDaftarIdFavorit();
+                          });
+                        },
+                      ),
                       
                       onTap: () {
                         Navigator.push(
