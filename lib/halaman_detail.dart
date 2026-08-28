@@ -27,33 +27,40 @@ class _DetailKontakState extends State<DetailKontak> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(
+              radius: 50,
               backgroundColor: Colors.blue[100],
-              backgroundImage: NetworkImage(widget.kontak.avatar),
-              maxRadius: 60,
+              backgroundImage: NetworkImage(widget.kontak.avatar), 
             ),
 
-            SizedBox(height: 16),
-
-
+            SizedBox(height: 20),
+            
             Text(
-              "Nama Depan: ${widget.kontak.namaDepan}",
-              style: TextStyle(fontSize: 18),
+              widget.kontak.namaDepan + " " + widget.kontak.namaBelakang,
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
-            Text(
-              "Nama Belakang: ${widget.kontak.namaBelakang}",
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Email: ${widget.kontak.email}",
-              style: TextStyle(fontSize: 18),
+
+            SizedBox(height: 20),
+
+            // KOTAK INFORMASI DETAIL LU DI SINI
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Card(
+                elevation: 3, // Bikin efek bayangan (3D)
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.email, color: Colors.blueAccent),
+                      title: Text('Email'),
+                      subtitle: Text(widget.kontak.email),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
