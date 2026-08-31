@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'halaman_utama.dart';
+import 'halaman_login.dart';
 
 void main() {
   runApp(ApkikasiKontak());
@@ -11,7 +11,7 @@ class ApkikasiKontak extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HalamanUtama(),
+      home: HalamanLogin(),
     );
   }
 }
