@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'halaman_utama.dart';
 import 'halaman_login.dart';
 
-void main() {
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://vjggpiurgcrskntslayg.supabase.co', 
+    anonKey: 'sb_publishable_3uK6Kg3Wv_PbTvXrQZ7d0Q_pVJ4iR_x', 
+  );
+
   runApp(ApkikasiKontak());
 }
 
@@ -32,32 +41,25 @@ class _GerbangMasukState extends State<GerbangMasuk> {
   }
 
   void cekApakahUdahLogin() async {
-    final prefs = await SharedPreferences.getInstance();
+    final sesiAktif = Supabase.instance.client.auth.currentSession;
     
-    // Coba ambil token dari brankas
-    String? tokenBawaan = prefs.getString('token_user');
-
-    // Kasih jeda 1 detik biar ada efek loading (opsional)
-    await Future.delayed(Duration(seconds: 1));
-
-    if (tokenBawaan != null) {
-      // Kalau Token ADA, tendang langsung ke Halaman Utama!
+    if (sesiAktif != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HalamanUtama()),
       );
+
     } else {
-      // Kalau Token KOSONG (null), suruh dia Login dulu!
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HalamanLogin()),
       );
+
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Tampilan layarnya cuma putih polos dengan muter-muter di tengah
     return Scaffold(
       backgroundColor: Colors.blueAccent,
       body: Center(

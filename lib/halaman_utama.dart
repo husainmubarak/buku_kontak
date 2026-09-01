@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
@@ -75,9 +76,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           IconButton(
             icon: Icon(Icons.logout), 
             onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-
-              await prefs.remove('token_user'); 
+              await Supabase.instance.client.auth.signOut();
 
               Navigator.pushReplacement(
                 context,
