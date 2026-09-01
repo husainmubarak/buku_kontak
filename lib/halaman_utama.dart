@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
+import 'halaman_login.dart';
 
 class HalamanUtama extends StatefulWidget {
   @override
@@ -65,7 +66,29 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Aplikasi Kontak", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),), backgroundColor: Colors.blue,),
+      appBar: AppBar(
+        title: Text("Aplikasi Kontak", 
+        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),), 
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout), 
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+
+              await prefs.remove('token_user'); 
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HalamanLogin()),
+              );
+            },
+          ),
+        ],
+      ),
+        
+
       body: Padding(
         padding: EdgeInsets.all(10),
         child:Column(
