@@ -47,6 +47,52 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     }
   }
 
+  void konfirmasiHapus(DataKontak kontak) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Hapus Kontak?'),
+        content: Text('Lu yakin mau menghapus ${kontak.nama} dari daftar?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); 
+              hapusKontakDariSupabase(kontak.id);
+            },
+            child: Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> hapusKontakDariSupabase(int id) async {
+    setState(() {
+      isLoading = true; 
+    });
+
+    try {
+      await Supabase.instance.client.from('kontak').delete().eq('id', id);
+
+      ambilDataDariInternet(); 
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kontak berhasil dihapus!'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red),
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   void bacaDaftarIdFavorit() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -125,26 +171,32 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                               overflow: TextOverflow.clip,
                               ),
                             subtitle: Text(kontak.email),
-                            trailing: IconButton(
-                              icon: Icon(
-                                isFavorit
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: isFavorit ? Colors.red : null,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (isFavorit) {
-                                    daftarIdFavorit.remove(
-                                      kontak.id.toString(),
-                                    );
-                                  } else {
-                                    daftarIdFavorit.add(kontak.id.toString());
-                                  }
-
-                                  simpanDaftarIdFavorit();
-                                });
-                              },
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min, 
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    isFavorit ? Icons.favorite : Icons.favorite_border,
+                                    color: isFavorit ? Colors.red : null,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (isFavorit) {
+                                        daftarIdFavorit.remove(kontak.id.toString());
+                                      } else {
+                                        daftarIdFavorit.add(kontak.id.toString());
+                                      }
+                                      simpanDaftarIdFavorit();
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red[400]),
+                                  onPressed: () {
+                                    konfirmasiHapus(kontak); 
+                                  },
+                                ),
+                              ],
                             ),
 
                             onTap: () {
