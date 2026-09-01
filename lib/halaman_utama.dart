@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
 import 'halaman_login.dart';
@@ -23,6 +24,21 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     bacaDaftarIdFavorit();
   }
 
+  void urutkanKontak() {
+    daftarKontak.sort((a, b) {
+      bool aFavorit = daftarIdFavorit.contains(a.id.toString());
+      bool bFavorit = daftarIdFavorit.contains(b.id.toString());
+
+      if (aFavorit && !bFavorit) {
+        return -1;
+      } else if (!aFavorit && bFavorit) {
+        return 1;
+      } else {
+        return a.nama.toLowerCase().compareTo(b.nama.toLowerCase());
+      }
+    });
+  }
+
   Future<void> ambilDataDariInternet() async {
     setState(() {
       isLoading = true;
@@ -33,6 +49,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
       setState(() {
         daftarKontak = data.map((item) => DataKontak.fromJson(item)).toList();
       });
+      urutkanKontak();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -197,6 +214,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                                     daftarIdFavorit.add(kontak.id.toString());
                                   }
                                   simpanDaftarIdFavorit();
+                                  urutkanKontak();
                                 });
                               },
                             ),
