@@ -63,7 +63,7 @@ class _HalamanEditKontakState extends State<HalamanEditKontak> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Edit Kontak"),
-        backgroundColor: Colors.orange, 
+        backgroundColor: Colors.blue, 
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -90,7 +90,7 @@ class _HalamanEditKontakState extends State<HalamanEditKontak> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                 onPressed: isLoading ? null : updateKeSupabase,
                 child: isLoading 
                     ? CircularProgressIndicator(color: Colors.white)

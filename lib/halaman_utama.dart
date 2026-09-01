@@ -5,7 +5,6 @@ import 'data_kontak.dart';
 import 'halaman_detail.dart';
 import 'halaman_login.dart';
 import 'halaman_tambah_kontak.dart';
-import 'halaman_edit_kontak.dart';
 
 class HalamanUtama extends StatefulWidget {
   @override
@@ -56,15 +55,18 @@ class _HalamanUtamaState extends State<HalamanUtama> {
         content: Text('Lu yakin mau menghapus ${kontak.nama} dari daftar?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), 
+            onPressed: () => Navigator.pop(context),
             child: Text('Batal'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); 
+              Navigator.pop(context);
               hapusKontakDariSupabase(kontak.id);
             },
-            child: Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Hapus',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -73,20 +75,26 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   Future<void> hapusKontakDariSupabase(int id) async {
     setState(() {
-      isLoading = true; 
+      isLoading = true;
     });
 
     try {
       await Supabase.instance.client.from('kontak').delete().eq('id', id);
 
-      ambilDataDariInternet(); 
+      ambilDataDariInternet();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kontak berhasil dihapus!'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text('Kontak berhasil dihapus!'),
+          backgroundColor: Colors.green,
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Gagal menghapus: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
       setState(() {
         isLoading = false;
@@ -170,59 +178,41 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                               kontak.nama,
                               maxLines: 1,
                               overflow: TextOverflow.clip,
-                              ),
+                            ),
                             subtitle: Text(kontak.email),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min, 
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    isFavorit ? Icons.favorite : Icons.favorite_border,
-                                    color: isFavorit ? Colors.red : null,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      if (isFavorit) {
-                                        daftarIdFavorit.remove(kontak.id.toString());
-                                      } else {
-                                        daftarIdFavorit.add(kontak.id.toString());
-                                      }
-                                      simpanDaftarIdFavorit();
-                                    });
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.edit, color: Colors.orange),
-                                  onPressed: () async {
-                                    final hasil = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => HalamanEditKontak(kontak: kontak),
-                                      ),
+                            trailing: IconButton(
+                              icon: Icon(
+                                isFavorit
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorit ? Colors.red : null,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  if (isFavorit) {
+                                    daftarIdFavorit.remove(
+                                      kontak.id.toString(),
                                     );
-
-                                    if (hasil == true) {
-                                      ambilDataDariInternet();
-                                    }
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red[400]),
-                                  onPressed: () {
-                                    konfirmasiHapus(kontak); 
-                                  },
-                                ),
-                              ],
+                                  } else {
+                                    daftarIdFavorit.add(kontak.id.toString());
+                                  }
+                                  simpanDaftarIdFavorit();
+                                });
+                              },
                             ),
 
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              final hasil = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       DetailKontak(kontak: kontak),
                                 ),
                               );
+
+                              if (hasil == true) {
+                                ambilDataDariInternet();
+                              }
                             },
                           ),
                         );
@@ -243,7 +233,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           );
 
           if (hasil == true) {
-            ambilDataDariInternet(); 
+            ambilDataDariInternet();
           }
         },
       ),
