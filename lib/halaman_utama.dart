@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:http/http.dart' as http;
-
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
 import 'halaman_login.dart';
+import 'halaman_tambah_kontak.dart';
 
 class HalamanUtama extends StatefulWidget {
   @override
@@ -167,6 +163,21 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             ),
           ],
         ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        child: Icon(Icons.add, color: Colors.white),
+        onPressed: () async {
+          final hasil = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HalamanTambahKontak()),
+          );
+
+          if (hasil == true) {
+            ambilDataDariInternet(); 
+          }
+        },
       ),
     );
   }
