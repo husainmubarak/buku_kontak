@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
-import 'halaman_login.dart';
 import 'halaman_tambah_kontak.dart';
 
 class HalamanUtama extends StatefulWidget {
@@ -15,6 +13,7 @@ class HalamanUtama extends StatefulWidget {
 class _HalamanUtamaState extends State<HalamanUtama> {
   List<DataKontak> daftarKontak = [];
   List<String> daftarIdFavorit = [];
+  String kataKunci = '';
   bool isLoading = false;
 
   @override
@@ -135,112 +134,108 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   @override
   Widget build(BuildContext context) {
+    final kontakYangDitampilkan = daftarKontak.where((kontak) {
+      return kontak.nama.toLowerCase().contains(kataKunci.toLowerCase());
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Aplikasi Kontak",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text("Buku Kontak"),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await Supabase.instance.client.auth.signOut();
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HalamanLogin()),
-              );
-            },
-          ),
-        ],
       ),
-
-      body: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Text(
-              "Daftar Kontak",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-            ),
-
-            SizedBox(height: 20),
-
-            Expanded(
-              child: isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      itemCount: daftarKontak.length,
-                      itemBuilder: (context, index) {
-                        DataKontak kontak = daftarKontak[index];
-                        bool isFavorit = daftarIdFavorit.contains(
-                          kontak.id.toString(),
-                        );
-
-                        return Card(
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.blue[100],
-                              backgroundImage: NetworkImage(kontak.foto),
-                            ),
-                            title: Text(
-                              kontak.nama,
-                              maxLines: 1,
-                              overflow: TextOverflow.clip,
-                            ),
-                            subtitle: Text(kontak.email),
-                            trailing: IconButton(
-                              icon: Icon(
-                                isFavorit
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: isFavorit ? Colors.red : null,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (isFavorit) {
-                                    daftarIdFavorit.remove(
-                                      kontak.id.toString(),
-                                    );
-                                  } else {
-                                    daftarIdFavorit.add(kontak.id.toString());
-                                  }
-                                  simpanDaftarIdFavorit();
-                                  urutkanKontak();
-                                });
-                              },
-                            ),
-
-                            onTap: () async {
-                              final hasil = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      DetailKontak(kontak: kontak),
-                                ),
-                              );
-
-                              if (hasil == true) {
-                                ambilDataDariInternet();
-                              }
-                            },
-                          ),
-                        );
-                      },
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    onChanged: (nilaiTeks) {
+                      setState(() {
+                        kataKunci = nilaiTeks; 
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Cari Nama Kontak...',
+                      prefixIcon: Icon(Icons.search, color: Colors.blue),
+                      filled: true,
+                      fillColor: Colors.grey[210],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30), 
+                        borderSide: BorderSide.none, 
+                      ),
                     ),
-            ),
-          ],
-        ),
-      ),
+                  ),
+                ),
 
+                Expanded(
+                  child: kontakYangDitampilkan.isEmpty
+                      ? Center(
+                          child: Text(
+                            'Kontak tidak ditemukan', 
+                            style: TextStyle(fontSize: 18, color: Colors.grey)
+                          )
+                        )
+                      : ListView.builder(
+                          itemCount: kontakYangDitampilkan.length, 
+                          itemBuilder: (context, index) {
+                            final kontak = kontakYangDitampilkan[index]; 
+                            final isFavorit = daftarIdFavorit.contains(kontak.id.toString());
+
+                            return Card(
+                              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage: NetworkImage(kontak.foto),
+                                ),
+                                title: Text(
+                                  kontak.nama,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.clip,
+                                ),
+                                subtitle: Text(kontak.email),
+
+                                trailing: IconButton(
+                                  icon: Icon(
+                                    isFavorit ? Icons.favorite : Icons.favorite_border,
+                                    color: isFavorit ? Colors.red : null,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (isFavorit) {
+                                        daftarIdFavorit.remove(kontak.id.toString());
+                                      } else {
+                                        daftarIdFavorit.add(kontak.id.toString());
+                                      }
+                                      simpanDaftarIdFavorit();
+                                      urutkanKontak(); 
+                                    });
+                                  },
+                                ),
+
+                                onTap: () async {
+                                  final hasil = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailKontak(kontak: kontak),
+                                    ),
+                                  );
+
+                                  if (hasil == true) {
+                                    ambilDataDariInternet();
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+            
+      // TOMBOL TAMBAH KONTAK
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
         child: Icon(Icons.add, color: Colors.white),
@@ -249,7 +244,6 @@ class _HalamanUtamaState extends State<HalamanUtama> {
             context,
             MaterialPageRoute(builder: (context) => HalamanTambahKontak()),
           );
-
           if (hasil == true) {
             ambilDataDariInternet();
           }
