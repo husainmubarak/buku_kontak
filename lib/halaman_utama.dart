@@ -5,6 +5,7 @@ import 'data_kontak.dart';
 import 'halaman_detail.dart';
 import 'halaman_login.dart';
 import 'halaman_tambah_kontak.dart';
+import 'halaman_edit_kontak.dart';
 
 class HalamanUtama extends StatefulWidget {
   @override
@@ -188,6 +189,21 @@ class _HalamanUtamaState extends State<HalamanUtama> {
                                       }
                                       simpanDaftarIdFavorit();
                                     });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.orange),
+                                  onPressed: () async {
+                                    final hasil = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HalamanEditKontak(kontak: kontak),
+                                      ),
+                                    );
+
+                                    if (hasil == true) {
+                                      ambilDataDariInternet();
+                                    }
                                   },
                                 ),
                                 IconButton(
