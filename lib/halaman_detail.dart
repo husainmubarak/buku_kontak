@@ -34,13 +34,13 @@ class _DetailKontakState extends State<DetailKontak> {
             CircleAvatar(
               radius: 50,
               backgroundColor: Colors.blue[100],
-              backgroundImage: NetworkImage(widget.kontak.avatar), 
+              backgroundImage: NetworkImage(widget.kontak.foto), 
             ),
 
             SizedBox(height: 20),
 
             Text(
-              widget.kontak.namaDepan + " " + widget.kontak.namaBelakang,
+              widget.kontak.nama,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
 

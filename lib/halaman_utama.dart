@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
+
 import 'data_kontak.dart';
 import 'halaman_detail.dart';
 import 'halaman_login.dart';
@@ -17,10 +20,10 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   List<String> daftarIdFavorit = [];
   bool isLoading = false;
 
-   @override
+  @override
   void initState() {
     super.initState();
-    ambilDataDariInternet(); 
+    ambilDataDariInternet();
     bacaDaftarIdFavorit();
   }
 
@@ -30,19 +33,17 @@ class _HalamanUtamaState extends State<HalamanUtama> {
     });
 
     try {
-      var url = Uri.parse('https://reqres.in/api/users?page=1');
-      var response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        print('Response body: ${response.body}');
-        List<dynamic> dataJsonMentah = jsonDecode(response.body)['data'];
-
-        setState(() {
-          daftarKontak = dataJsonMentah.map((item) => DataKontak.fromJson(item)).toList();
-        });
-      }
+      final data = await Supabase.instance.client.from('kontak').select();
+      setState(() {
+        daftarKontak = data.map((item) => DataKontak.fromJson(item)).toList();
+      });
     } catch (e) {
-      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal narik data: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       setState(() {
         isLoading = false;
@@ -52,7 +53,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   void bacaDaftarIdFavorit() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     setState(() {
       daftarIdFavorit = prefs.getStringList('data_favorit') ?? [];
     });
@@ -60,7 +61,7 @@ class _HalamanUtamaState extends State<HalamanUtama> {
 
   void simpanDaftarIdFavorit() async {
     final prefs = await SharedPreferences.getInstance();
-   
+
     await prefs.setStringList('data_favorit', daftarIdFavorit);
   }
 
@@ -68,13 +69,19 @@ class _HalamanUtamaState extends State<HalamanUtama> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Aplikasi Kontak", 
-        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),), 
+        title: Text(
+          "Aplikasi Kontak",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout), 
+            icon: Icon(Icons.logout),
             onPressed: () async {
               await Supabase.instance.client.auth.signOut();
 
@@ -86,64 +93,78 @@ class _HalamanUtamaState extends State<HalamanUtama> {
           ),
         ],
       ),
-        
 
       body: Padding(
         padding: EdgeInsets.all(10),
-        child:Column(
+        child: Column(
           children: [
-            Text("Daftar Kontak", style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),),
-            
+            Text(
+              "Daftar Kontak",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+            ),
+
             SizedBox(height: 20),
 
             Expanded(
-              child: isLoading ? Center(child: CircularProgressIndicator()) : ListView.builder(
-                itemCount: daftarKontak.length,
-                itemBuilder: (context, index) {
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: daftarKontak.length,
+                      itemBuilder: (context, index) {
+                        DataKontak kontak = daftarKontak[index];
+                        bool isFavorit = daftarIdFavorit.contains(
+                          kontak.id.toString(),
+                        );
 
-                  DataKontak kontak = daftarKontak[index];
-                  bool isFavorit = daftarIdFavorit.contains(kontak.id.toString());
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.blue[100],
+                              backgroundImage: NetworkImage(kontak.foto),
+                            ),
+                            title: Text(
+                              kontak.nama,
+                              maxLines: 1,
+                              overflow: TextOverflow.clip,
+                              ),
+                            subtitle: Text(kontak.email),
+                            trailing: IconButton(
+                              icon: Icon(
+                                isFavorit
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorit ? Colors.red : null,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  if (isFavorit) {
+                                    daftarIdFavorit.remove(
+                                      kontak.id.toString(),
+                                    );
+                                  } else {
+                                    daftarIdFavorit.add(kontak.id.toString());
+                                  }
 
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 5),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.blue[100],
-                        backgroundImage: NetworkImage(kontak.avatar),
-                      ),
-                      title: Text(kontak.namaDepan),
-                      subtitle: Text(kontak.email),
-                      trailing: IconButton(
-                        icon: Icon(
-                          isFavorit ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorit ? Colors.red : null,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            if (isFavorit) {
-                              daftarIdFavorit.remove(kontak.id.toString());
-                            } else {
-                              daftarIdFavorit.add(kontak.id.toString());
-                            }
+                                  simpanDaftarIdFavorit();
+                                });
+                              },
+                            ),
 
-                            simpanDaftarIdFavorit();
-                          });
-                        },
-                      ),
-                      
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailKontak(kontak: kontak),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailKontak(kontak: kontak),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
                     ),
-                  );
-                },
-              ),
-            )
+            ),
           ],
         ),
       ),

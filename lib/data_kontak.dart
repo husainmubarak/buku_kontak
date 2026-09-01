@@ -1,25 +1,22 @@
 class DataKontak {
   final int id;
-  final String namaDepan;
-  final String namaBelakang;
+  final String nama;
   final String email;
-  final String avatar;
+  final String foto;
 
   DataKontak({
     required this.id,
-    required this.namaDepan,
-    required this.namaBelakang,
+    required this.nama,
     required this.email,
-    required this.avatar,
+    required this.foto,
   });
 
   factory DataKontak.fromJson(Map<String, dynamic> json) {
     return DataKontak(
       id: json['id'],
-      namaDepan: json['first_name'],
-      namaBelakang: json['last_name'],
-      email: json['email'],
-      avatar: json['avatar'],
+      nama: json['nama'] ?? 'Tanpa Nama', 
+      email: json['email'] ?? 'Tidak ada email',
+      foto: json['foto'] ?? 'https://robohash.org/0',
     );
   }
 }
